@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>利用データ | Re:Scale</title>
+  <link rel="stylesheet" href="./css/style.css">
+</head>
+<body class="info-page data-page">
+  <header class="site-header">
+    <h1 class="page-heading">利用データ</h1>
+  </header>
+  <main class="control-panel">
+    <p>本アプリで利用しているデータの一覧です。</p>
+    <p>データに関する問い合わせは<a href="./contact.html">開発者の窓口</a>へお願いします。<b>データ提供元</b>には問い合わせないでください。</p>
+    <h2>目的別の利用データ</h2>
+    <div class="data-table-wrap"><table>
+      <thead><tr><th>目的</th><th>分類</th><th>データ提供元</th><th>説明</th><th>ライセンス・利用条件</th></tr></thead>
+      <tbody>
+        <tr><td rowspan="5">路線図を表示する</td><td rowspan="2">駅</td><td><a href="https://ckan.odpt.org/ja/dataset/jreast_tokyo_area">鉄道関連情報（GTFS）</a></td><td>地図上に駅を丸印で表示するために、駅名と緯度・経度を利用する。</td><td><a href="https://developer.odpt.org/challenge_license">限定ライセンス</a>・特定利用条件</td></tr>
+        <tr><td><a href="https://ckan.odpt.org/ja/dataset/jreast__r_station">駅情報</a></td><td>駅と列車時刻表を結び付けるために利用する。</td><td><a href="https://developer.odpt.org/challenge_license">限定ライセンス</a>・特定利用条件</td></tr>
+        <tr><td rowspan="3">路線</td><td><a href="https://ckan.odpt.org/ja/dataset/jreast__r_train_timetable">列車時刻表</a></td><td>路線図を描画するために、列車の停車駅を特定する。連続的に停車する駅は、同じ路線であると判定する。</td><td><a href="https://developer.odpt.org/challenge_license">限定ライセンス</a>・特定利用条件</td></tr>
+        <tr><td><a href="https://ckan.odpt.org/ja/dataset/jreast__r_route">路線系統情報</a></td><td>線路図の路線名を表示するために、路線名を利用する。</td><td><a href="https://developer.odpt.org/challenge_license">限定ライセンス</a>・特定利用条件</td></tr>
+        <tr><td><a href="https://nlftp.mlit.go.jp/ksj/gml/datalist/KsjTmplt-N02-2025.html">国土数値情報 鉄道データ N02-25</a></td><td>線路図の形状を描画するために、線路の位置と形を利用する。</td><td><a href="https://nlftp.mlit.go.jp/ksj/gml/datalist/KsjTmplt-N02-2025.html">CC BY 4.0</a>（出典表示）</td></tr>
+        <tr><td>駅からの実効時間による到達範囲を計算する</td><td>方向別の駅間時間</td><td><a href="https://ckan.odpt.org/ja/dataset/jreast__r_train_timetable">列車時刻表</a></td><td>選んだ駅から出発する方向の実効時間を計算するために、同じ方向・列車種別・曜日の発着時刻から求めた駅間時間の中央値を利用する。初期設定は普通・平日で、普通と快速系を混ぜず、選択したカテゴリと曜日の時間だけを使う。</td><td><a href="https://developer.odpt.org/challenge_license">限定ライセンス</a>・特定利用条件</td></tr>
+        <tr><td>地図の背景を表示する</td><td>背景地図</td><td><a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a></td><td>駅や路線の位置を街の中で確認できるようにするために、背景地図を利用する。</td><td><a href="https://www.openstreetmap.org/copyright">ODbL 1.0</a>（地図データ）・出典表示</td></tr>
+        <tr><td rowspan="2">災害の影響を地図と到達範囲に反映する</td><td>災害の表示</td><td><a href="https://disaportal.gsi.go.jp/hazardmap/copyright/opendata.html">ハザードマップポータルサイト</a>の公開タイル</td><td>選んだ災害の範囲を地図で確認できるようにするために、洪水・内水・土砂・高潮・津波の分布を重ねて表示する。</td><td><a href="https://disaportal.gsi.go.jp/hazardmap/copyright/copyright.html">公共データ利用規約（PDL 1.0）</a>・各データの利用条件</td></tr>
+        <tr><td>災害による追加コスト</td><td><a href="https://disaportal.gsi.go.jp/hazardmap/copyright/opendata.html">ハザードマップポータルサイト</a>の公開タイル</td><td>災害を考慮して到達範囲を計算するために、駅間の線路が着色域を通る割合を利用する。危険度階級は区別せず、同じ災害条件内で重なる領域は一度だけ数える。</td><td><a href="https://disaportal.gsi.go.jp/hazardmap/copyright/copyright.html">公共データ利用規約（PDL 1.0）</a>・各データの利用条件</td></tr>
+      </tbody>
+    </table></div>
+    <p>取得日時：<time id="odpt-retrieved">読み込み中</time>。実際の運休や遅延を表示する機能はありません。</p>
+    <p>路線形状と災害データの位置には、それぞれの公開データに由来する誤差が含まれる場合があります。</p>
+  </main>
+  <footer>
+    <nav aria-label="アプリの案内"><a href="./">トップ</a><span>·</span><a href="./manual.html">使い方</a><span>·</span><a href="./mechanism.html">Re:Scaleの仕組み</a><span>·</span><a href="./data.html">利用データ</a><span>·</span><a href="./contact.html">お問い合わせ先</a></nav>
+  </footer>
+  <script>fetch('./data/railway.json').then(response => response.json()).then(data => { const value = data.provenance.retrieved_at_utc; document.getElementById('odpt-retrieved').textContent = new Date(value).toLocaleString('ja-JP', { timeZone: 'Asia/Tokyo' }) + '（日本時間）'; }).catch(() => { document.getElementById('odpt-retrieved').textContent = '取得日時を表示できません'; });</script>
+</body>
+</html>

@@ -1,0 +1,42 @@
+# Secrets and local environment settings
+.env
+.env.*
+!.env.example
+
+# Downloaded source data and generated intermediate data
+.local/
+**/.local/
+scripts/
+
+# JavaScript dependencies and generated site
+node_modules/
+dist/
+coverage/
+.vite/
+rules/
+
+# Python caches and test caches
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# Local agent and editor state
+.agents/
+.codex/
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Logs, operating-system files, and temporary visual checks
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.DS_Store
+Thumbs.db
+*-check.png
+screenshot.png
