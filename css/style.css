@@ -119,7 +119,7 @@ footer nav { height:18px; align-items:center; }
 #field-map[hidden],#reach-map[hidden] { display:none; }
 .field-stage .leaflet-container { font-family:'DM Mono',monospace; font-size:10px; background:#e9eee7; }
 .field-stage .leaflet-tile-pane { opacity:.72; }
-.field-stage .field-station-info,.field-stage .mesh-info,.field-stage .field-note { z-index:650; }
+.field-stage .field-station-info,.field-stage .field-note { z-index:650; }
 .field-stage .field-note { padding:5px 7px; background:rgba(251,250,245,.92); }
 .field-stage .leaflet-control-zoom a { color:var(--ink); background:#fbfaf5; }
 .field-stage .leaflet-control-attribution { background:rgba(251,250,245,.82); }
@@ -138,9 +138,6 @@ footer nav { height:18px; align-items:center; }
 .field-station.is-selected text,.mds-station.is-selected text { display:block; }
 .field-station,.mds-station { cursor:pointer; }
 #field-map.is-mds ~ .field-note .north-mark { display:none; }
-.mesh-info { position:absolute; z-index:650; left:12px; top:12px; padding:7px 9px; color:var(--ink); background:rgba(251,250,245,.94); font-size:10px; line-height:1.5; }
-.mesh-info[hidden] { display:none; }
-.mesh-info a { color:var(--teal); }
 /* Station hit areas stay readable at dense zooms. */
 .field-route-line { stroke:#6b9d90; stroke-width:1.15; opacity:.22; pointer-events:none; }
 .field-station .station-hit-area { fill:transparent; stroke:none; pointer-events:all; }

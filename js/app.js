@@ -158,7 +158,6 @@ function drawStations() {
 function renderField() {
   $('#reach-map').hidden = displayMode === 'mds';
   $('#field-map').hidden = displayMode !== 'mds';
-  $('#mesh-info').hidden = displayMode === 'mds' || enabledHazards.length === 0;
   $('#field-map').classList.toggle('is-mds', displayMode === 'mds');
   $('#mds-quality').hidden = displayMode !== 'mds';
   $('#distance-range').disabled = displayMode === 'mds';
@@ -290,8 +289,6 @@ document.querySelectorAll('[data-display-mode]').forEach(button => button.addEve
 document.querySelectorAll('.hazard-toggle').forEach(input => input.addEventListener('change', async () => {
   enabledHazards = [...document.querySelectorAll('.hazard-toggle:checked')].map(item => item.dataset.hazard);
   meshOverlay.show(visibleMeshKeys());
-  $('#mesh-info').hidden = displayMode === 'mds' || enabledHazards.length === 0;
-  $('#mesh-info-title').textContent = enabledHazards.map(key => document.querySelector(`[data-hazard="${key}"]`).closest('label').querySelector('strong').textContent).join('・');
   if (input.checked && !hazardLoaded.has(input.dataset.hazard)) {
     const key = input.dataset.hazard;
     input.disabled = true;
@@ -306,7 +303,6 @@ document.querySelectorAll('.hazard-toggle').forEach(input => input.addEventListe
       input.checked = false;
       enabledHazards = [...document.querySelectorAll('.hazard-toggle:checked')].map(item => item.dataset.hazard);
       meshOverlay.show(visibleMeshKeys());
-      $('#mesh-info').hidden = displayMode === 'mds' || enabledHazards.length === 0;
       $('#status').textContent = `${key} の距離データを取得できません: ${error.message}`;
       input.disabled = false;
       return;
