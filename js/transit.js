@@ -26,10 +26,18 @@ export function createTransitModel(data, hazardWeights = {}) {
   }
 
   function runningCost(edge, hazards) {
-    const risk = edge.hazardRisks || {};
-    const impact = Math.min(hazards.cap, hazards.keys.reduce((sum, key) =>
-      sum + (hazardWeights[key] ?? 1) * Number(risk[key] || 0), 0));
-    return edge.baseTime * (1 + impact);
+    return runningSegmentCosts(edge, hazards).reduce((sum, segment) => sum + segment.cost, 0);
+  }
+
+  function runningSegmentCosts(edge, hazards = { keys: [], cap: Infinity }) {
+    const segments = edge.segments || [];
+    const totalLength = segments.reduce((sum, segment) => sum + segment.length, 0);
+    if (!segments.length || !(totalLength > 0)) return [{ geometry: edge.path, cost: edge.baseTime }];
+    return segments.map(segment => {
+      const impact = Math.min(hazards.cap, hazards.keys.reduce((sum, key) =>
+        sum + (hazardWeights[key] ?? 1) * Number(segment.hazards?.[key] || 0), 0));
+      return { geometry: segment.geometry, cost: edge.baseTime * segment.length / totalLength * (1 + impact) };
+    });
   }
 
   function shortestPaths(originStation, condition, hazards = { keys: [], cap: Infinity }) {
@@ -98,7 +106,7 @@ export function createTransitModel(data, hazardWeights = {}) {
   }
 
   return {
-    shortestPaths, runningEdges: data.runningEdges, nodes,
+    shortestPaths, runningEdges: data.runningEdges, nodes, runningSegmentCosts,
     setTransferExtra(value) { transferExtra = Math.max(0, Number(value) || 0); }
   };
 }

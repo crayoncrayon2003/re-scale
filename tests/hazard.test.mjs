@@ -1,16 +1,13 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import { createDistanceModel } from '../js/distance.js';
-import { decodeElevation, elevationFraction, exposureFraction, tilePixel } from '../js/hazard.js';
+import { decodeElevation, elevationFraction, splitPath, tilePixel } from '../js/hazard.js';
 
-test('hazard fractions scale with the selected timetable time', () => {
-  const edge = { from: 'a', to: 'b', minutes: 10,
-    minutesByMode: { ordinary_weekday: 10, ordinary_holiday: 12 },
-    hazardCosts: { flood: 5 } };
-  const model = createDistanceModel({ edges: [edge], hazardWeights: { flood: 0.5 } });
-  assert.equal(model.cost(edge, ['flood'], 'ordinary_weekday'), 12.5);
-  assert.equal(model.cost(edge, ['flood'], 'ordinary_holiday'), 15);
-  assert.equal(model.cost(edge, ['flood'], 'limited_express_weekday'), Infinity);
+test('physical paths are split into ordered sections no longer than 150 metres', () => {
+  const segments = splitPath([[139.7, 35.6], [139.7, 35.606]], 0.15);
+  assert.ok(segments.length > 1);
+  assert.ok(segments.every(segment => segment.length <= 0.150001));
+  assert.deepEqual(segments[0].geometry[0], [139.7, 35.6]);
+  assert.deepEqual(segments.at(-1).geometry[1], [139.7, 35.606]);
 });
 
 function tilesFor(points, rgba) {
@@ -23,24 +20,6 @@ function tilesFor(points, rgba) {
   }
   return tiles;
 }
-
-test('route exposure adds a nonnegative cost and changes shortest paths', () => {
-  const path = [[135.5, 34.7], [135.501, 34.7], [135.502, 34.7]];
-  const midpoints = [[135.5005, 34.7], [135.5015, 34.7]];
-  const raster = tilesFor([midpoints[0]], [255, 100, 100, 255]);
-  assert.ok(Math.abs(exposureFraction(path, [raster]) - 0.5) < 1e-6);
-  const edges = [
-    { from: 'a', to: 'b', minutes: 10, hazardCosts: { flood: 10 * exposureFraction(path, [raster]) } },
-    { from: 'a', to: 'c', minutes: 6 },
-    { from: 'c', to: 'b', minutes: 6 }
-  ];
-  const model = createDistanceModel({ edges });
-  assert.equal(model.shortestPaths('a').distances.get('b'), 10);
-  assert.equal(model.shortestPaths('a', ['flood']).distances.get('b'), 12);
-  assert.equal(model.shortestPaths('b', ['flood']).distances.get('a'), undefined);
-  assert.equal(createDistanceModel({ edges, hazardWeights: { flood: 0.2 } }).shortestPaths('a', ['flood']).distances.get('b'), 11);
-  assert.equal(createDistanceModel({ edges, hazardWeights: { flood: 0 } }).shortestPaths('a', ['flood']).distances.get('b'), 10);
-});
 
 test('official DEM encoding decodes signed heights and missing values', () => {
   assert.equal(decodeElevation(0, 39, 16), 100);

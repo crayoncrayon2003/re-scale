@@ -26,14 +26,17 @@ test('operation graph includes dwell and remains directed', () => {
 
 test('hazard risk increases only running-edge cost', () => {
   const input = structuredClone(data);
-  input.runningEdges[0].hazardRisks = { flood: 0.5 };
   const model = createTransitModel(input, { flood: 1 });
+  input.runningEdges[0].segments = [
+    { geometry: [[0, 0], [0.5, 0]], length: 1, hazards: { flood: 1 } },
+    { geometry: [[0.5, 0], [1, 0]], length: 1, hazards: { flood: 0 } }
+  ];
   assert.equal(model.shortestPaths('A', { day: 'weekday', category: 'local' }, { keys: ['flood'], cap: 4 }).stationDistances.get('C'), 13.5);
 });
 
 test('zero alpha equals baseline and nonnegative hazard cost is monotone', () => {
   const input = structuredClone(data);
-  input.runningEdges[0].hazardRisks = { flood: 1 };
+  input.runningEdges[0].segments = [{ geometry: [[0, 0], [1, 0]], length: 1, hazards: { flood: 1 } }];
   const condition = { day: 'weekday', category: 'local' };
   const zeroModel = createTransitModel(structuredClone(input), { flood: 0 });
   const hazardModel = createTransitModel(structuredClone(input), { flood: 1 });
@@ -43,4 +46,18 @@ test('zero alpha equals baseline and nonnegative hazard cost is monotone', () =>
   assert.equal(baseline.get('A'), 0);
   assert.equal(alphaZero.get('C'), baseline.get('C'));
   assert.ok(hazard.get('C') >= baseline.get('C'));
+});
+
+test('hazards and cap are composed per physical small segment', () => {
+  const input = structuredClone(data);
+  const model = createTransitModel(input, { flood: 1, tsunami: 1 });
+  input.runningEdges[0].segments = [
+    { geometry: [[0, 0], [0.5, 0]], length: 1, hazards: { flood: 1, tsunami: 0 } },
+    { geometry: [[0.5, 0], [1, 0]], length: 1, hazards: { flood: 0, tsunami: 1 } }
+  ];
+  const condition = { day: 'weekday', category: 'local' };
+  const both = model.shortestPaths('A', condition, { keys: ['flood', 'tsunami'], cap: 1 }).stationDistances.get('B');
+  const one = model.shortestPaths('A', condition, { keys: ['flood'], cap: 1 }).stationDistances.get('B');
+  assert.equal(both, 10);
+  assert.equal(one, 7.5);
 });

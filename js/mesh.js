@@ -14,7 +14,6 @@ export function createMeshOverlay(map) {
       layers.set(key, L.tileLayer(url, {
         pane: 'hazard-mesh', minZoom: 2, maxNativeZoom: 17,
         maxZoom: 19, opacity: 0.72,
-        attribution: '出典：<a href="https://disaportal.gsi.go.jp/hazardmap/copyright/opendata.html" target="_blank" rel="noopener noreferrer">ハザードマップポータルサイト</a>',
         ...options
       }));
     },

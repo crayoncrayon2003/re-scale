@@ -1,4 +1,5 @@
 // Official map tiles, sampled at z=10 for a consistent 150 m route grid.
+export const HAZARD_KEYS = ['flood', 'landslide', 'stormSurge', 'tsunami'];
 export const HAZARD_SOURCES = {
   flood: [
     'https://disaportaldata.gsi.go.jp/raster/01_flood_l2_shinsuishin_data/{z}/{x}/{y}.png',
@@ -34,6 +35,21 @@ function segmentKm(a, b) {
   return Math.hypot((b[1] - a[1]) * 111, (b[0] - a[0]) * 91);
 }
 
+export function splitPath(path, maxKm = 0.15) {
+  const segments = [];
+  for (let i = 1; i < path.length; i++) {
+    const a = path[i - 1], b = path[i];
+    const length = segmentKm(a, b);
+    const count = Math.max(1, Math.ceil(length / maxKm));
+    for (let part = 0; part < count; part++) {
+      const at = ratio => a.map((value, axis) => value + (b[axis] - value) * ratio);
+      const start = at(part / count), end = at((part + 1) / count);
+      segments.push({ geometry: [start, end], length: segmentKm(start, end), hazards: {}, coverage: {} });
+    }
+  }
+  return segments;
+}
+
 function tileId({ x, y }) { return `${x}/${y}`; }
 
 function requiredTiles(edges, elevation) {
@@ -41,8 +57,8 @@ function requiredTiles(edges, elevation) {
   for (const edge of edges) {
     const path = edge.path;
     if (elevation) for (const [lon, lat] of path) keys.add(tileId(tilePixel(lon, lat)));
-    else for (let i = 1; i < path.length; i++) {
-      const a = path[i - 1], b = path[i];
+    else for (const segment of edge.segments || splitPath(path)) {
+      const [a, b] = segment.geometry;
       keys.add(tileId(tilePixel((a[0] + b[0]) / 2, (a[1] + b[1]) / 2)));
     }
   }
@@ -85,17 +101,6 @@ function pixelAt(tiles, lon, lat) {
   return [data[offset], data[offset + 1], data[offset + 2], data[offset + 3]];
 }
 
-export function exposureFraction(path, sourceTiles) {
-  let exposed = 0, total = 0;
-  for (let i = 1; i < path.length; i++) {
-    const a = path[i - 1], b = path[i], length = segmentKm(a, b);
-    const lon = (a[0] + b[0]) / 2, lat = (a[1] + b[1]) / 2;
-    total += length;
-    if (sourceTiles.some(tiles => (pixelAt(tiles, lon, lat)?.[3] || 0) >= 128)) exposed += length;
-  }
-  return total ? exposed / total : 0;
-}
-
 export function elevationFraction(path, tiles) {
   let vertical = 0, horizontal = 0;
   let previous = null;
@@ -113,6 +118,9 @@ export function elevationFraction(path, tiles) {
 }
 
 export function createHazardEngine(edges) {
+  edges.forEach((edge, edgeIndex) => {
+    edge.segments ||= splitPath(edge.path).map((segment, index) => ({ ...segment, id: `${edgeIndex}:${index}` }));
+  });
   const promises = new Map();
   async function load(key, onProgress) {
     if (!HAZARD_SOURCES[key]) throw new Error(`Unknown hazard: ${key}`);
@@ -122,16 +130,27 @@ export function createHazardEngine(edges) {
       const total = ids.length * HAZARD_SOURCES[key].length;
       const sources = await Promise.all(HAZARD_SOURCES[key].map(template => loadSource(template, ids, () => onProgress?.(++done, total))));
       let affected = 0;
+      let unknownSegments = 0, segmentCount = 0;
       for (const edge of edges) {
-        const fraction = exposureFraction(edge.path, sources);
-        edge.hazardRisks ||= {};
-        edge.hazardRisks[key] = fraction;
+        let edgeExposed = false, edgeUnknown = false;
+        for (const segment of edge.segments) {
+          const [a, b] = segment.geometry;
+          const lon = (a[0] + b[0]) / 2, lat = (a[1] + b[1]) / 2;
+          const pixels = sources.map(source => pixelAt(source, lon, lat));
+          const isExposed = pixels.some(pixel => (pixel?.[3] || 0) >= 128);
+          const status = isExposed ? 'hazard' : pixels.some(pixel => pixel === null) ? 'unavailable' : 'clear';
+          segment.hazards[key] = isExposed ? 1 : 0;
+          segment.coverage[key] = status;
+          if (isExposed) edgeExposed = true;
+          if (status === 'unavailable') { edgeUnknown = true; unknownSegments++; }
+          segmentCount++;
+        }
         edge.hazardCoverage ||= {};
-        edge.hazardCoverage[key] = sources.some(source => edge.path.some(point => pixelAt(source, ...point))) ? 'evaluated' : 'unknown';
-        if (fraction > 0) affected++;
+        edge.hazardCoverage[key] = edgeUnknown ? 'unavailable' : 'evaluated';
+        if (edgeExposed) affected++;
       }
-      const unknown = edges.filter(edge => edge.hazardCoverage[key] === 'unknown').length;
-      return { affected, unknown, total: edges.length, tiles: ids.length };
+      const unknown = edges.filter(edge => edge.hazardCoverage[key] === 'unavailable').length;
+      return { affected, unknown, total: edges.length, tiles: ids.length, unknownSegments, segmentCount };
     })().catch(error => { promises.delete(key); throw error; }));
     return promises.get(key);
   }

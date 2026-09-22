@@ -23,13 +23,12 @@ let mdsScreenScale = 1;
 let mdsDisconnectedCount = 0;
 let mdsOriginId = null;
 let mdsServiceAvailable = true;
-import { HAZARD_KEYS } from './distance.js';
 import { createTransitModel } from './transit.js';
 const HAZARD_WEIGHTS = Object.fromEntries(HAZARD_KEYS.map(key => [key, 1]));
 let hazardCap = 4;
 import { reachableEdgePaths } from './reachability.js';
 import { createMeshOverlay } from './mesh.js';
-import { createHazardEngine, HAZARD_SOURCES } from './hazard.js';
+import { createHazardEngine, HAZARD_KEYS, HAZARD_SOURCES } from './hazard.js';
 const fieldTransform = { scale: 1, x: 0, y: 0 };
 let fieldPanStart = null;
 function defaultOriginId() { return stations.find(station => station.name === '東京')?.id || stations[0]?.id; }
@@ -81,7 +80,7 @@ synchronizeMap(map, reachMap);
 synchronizeMap(reachMap, map);
 const operatorColors = new Map();
 function currentOrigin() { return stations.find(station => station.id === originId) || stations[2]; }
-function hazardSummary() { return enabledHazards.map(key => { const value = hazardAffected.get(key) || {}; return `${document.querySelector(`[data-hazard="${key}"]`).closest('label').querySelector('strong').textContent}: 曝露${value.affected ?? 0}辺・未評価${value.unknown ?? 0}辺`; }).join(' · '); }
+function hazardSummary() { return enabledHazards.map(key => { const value = hazardAffected.get(key) || {}; return `${document.querySelector(`[data-hazard="${key}"]`).closest('label').querySelector('strong').textContent}: 曝露${value.affected ?? 0}辺・判定不能${value.unknownSegments ?? 0}小区間`; }).join(' · '); }
 function serviceCondition() {
   return { category: $('#service-type').value, day: $('#service-day').value };
 }
@@ -112,14 +111,13 @@ function renderReachMap() {
   comparisonReachLayer.clearLayers();
   reachStationLayer.clearLayers();
   if (enabledHazards.length) for (const edge of routeEdges) {
-    const cost = edge.baseTime;
+    const cost = distanceModel.runningSegmentCosts(edge, hazardOptions([]));
     for (const path of reachableEdgePaths(edge, baseline.nodeDistances, maxMinutes, cost)) {
       L.polyline(path.map(([lon, lat]) => [lat, lon]), { pane: 'reach-colored', color: '#e2a04e', weight: 6, opacity: .9, interactive: false, smoothFactor: 0 }).addTo(comparisonReachLayer);
     }
   }
   for (const edge of routeEdges) {
-    const impact = Math.min(hazardCap, enabledHazards.reduce((sum, key) => sum + HAZARD_WEIGHTS[key] * Number(edge.hazardRisks?.[key] || 0), 0));
-    const cost = edge.baseTime * (1 + impact);
+    const cost = distanceModel.runningSegmentCosts(edge, hazardOptions());
     for (const path of reachableEdgePaths(edge, active.nodeDistances, maxMinutes, cost)) {
       L.polyline(path.map(([lon, lat]) => [lat, lon]), { pane: 'reach-colored', color: '#168778', weight: 5, opacity: .92, interactive: false, smoothFactor: 0 }).addTo(coloredReachLayer);
     }

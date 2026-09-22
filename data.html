@@ -25,7 +25,7 @@
         <tr><td>駅からの実効時間による到達範囲を計算する</td><td>方向別の駅間時間</td><td><a href="https://ckan.odpt.org/ja/dataset/jreast__r_train_timetable">列車時刻表</a></td><td>選んだ駅から出発する方向の実効時間を計算するために、同じ方向・列車種別・曜日の発着時刻から求めた駅間時間の中央値を利用する。初期設定は普通・平日で、普通と快速系を混ぜず、選択したカテゴリと曜日の時間だけを使う。</td><td><a href="https://developer.odpt.org/challenge_license">限定ライセンス</a>・特定利用条件</td></tr>
         <tr><td>地図の背景を表示する</td><td>背景地図</td><td><a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a></td><td>駅や路線の位置を街の中で確認できるようにするために、背景地図を利用する。</td><td><a href="https://www.openstreetmap.org/copyright">ODbL 1.0</a>（地図データ）・出典表示</td></tr>
         <tr><td rowspan="2">災害の影響を地図と到達範囲に反映する</td><td>災害の表示</td><td><a href="https://disaportal.gsi.go.jp/hazardmap/copyright/opendata.html">ハザードマップポータルサイト</a>の公開タイル</td><td>選んだ災害の範囲を地図で確認できるようにするために、洪水・内水・土砂・高潮・津波の分布を重ねて表示する。</td><td><a href="https://disaportal.gsi.go.jp/hazardmap/copyright/copyright.html">公共データ利用規約（PDL 1.0）</a>・各データの利用条件</td></tr>
-        <tr><td>災害による追加コスト</td><td><a href="https://disaportal.gsi.go.jp/hazardmap/copyright/opendata.html">ハザードマップポータルサイト</a>の公開タイル</td><td>災害を考慮して到達範囲を計算するために、駅間の線路が着色域を通る割合を利用する。危険度階級は区別せず、同じ災害条件内で重なる領域は一度だけ数える。</td><td><a href="https://disaportal.gsi.go.jp/hazardmap/copyright/copyright.html">公共データ利用規約（PDL 1.0）</a>・各データの利用条件</td></tr>
+        <tr><td>災害による追加コスト</td><td><a href="https://disaportal.gsi.go.jp/hazardmap/copyright/opendata.html">ハザードマップポータルサイト</a>の公開タイル</td><td>災害を考慮して到達範囲を計算するために、線路を最大約150mの小区間に分け、各小区間の中点が着色域に入るかを利用する。初期版では危険度階級を区別せず、同じ災害条件内で重なる領域は一度だけ数える。</td><td><a href="https://disaportal.gsi.go.jp/hazardmap/copyright/copyright.html">公共データ利用規約（PDL 1.0）</a>・各データの利用条件</td></tr>
       </tbody>
     </table></div>
     <p>取得日時：<time id="odpt-retrieved">読み込み中</time>。実際の運休や遅延を表示する機能はありません。</p>
