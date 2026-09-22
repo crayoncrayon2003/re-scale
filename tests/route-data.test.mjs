@@ -41,7 +41,7 @@ test('local and rapid categories both produce radial and MDS station cohorts fro
       model.shortestPaths(station.id, condition, { keys: [], cap: 4 }).stationDistances.get(tokyo.id)
     ));
     assert.ok(outbound.sourceCount > 0);
-    assert.ok(within60.length > 1, `放射距離に${category}の到達駅が必要`);
+    assert.ok(within60.length > 1, `路線図の距離に${category}の到達駅が必要`);
     assert.ok(mutual.length > 1, `MDSに双方向到達可能な${category}停車駅が必要`);
   }
 });

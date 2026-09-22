@@ -2,7 +2,7 @@
 <html lang="ja"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Re:Scaleの仕組み</title><link rel="stylesheet" href="./css/style.css"></head>
 <body class="info-page manual-page"><header class="site-header"><h1 class="page-heading">Re:Scaleの仕組み</h1></header>
 <main class="control-panel">
-  <p>オープンデータを実効時間へ変換し、放射距離と多次元尺度法（MDS）へ反映する計算を説明します。</p>
+  <p>オープンデータを実効時間へ変換し、路線図と多次元尺度法（MDS）へ反映する計算を説明します。</p>
   <section><h2>1．交通ネットワーク</h2>
     <p>実際の線路形状を表す物理線路層と、列車の運行を表す運行ネットワーク層を分けます。運行ノードは、物理駅、運転系統、列車種別、方向、運行日、到着／出発状態の組で表します。</p>
     <p>駅間の代表走行時間と、列車が同じ運行状態のまま継続できるかどうかを分けて求めます。代表走行時間は、同じ出発駅・次の停車駅・方向・列車種別・運行日の複数記録から、<code>departure(A) → arrival(B)</code>の所要時間の中央値を求めます。</p>
@@ -20,9 +20,9 @@
     <p class="manual-formula"><code>t<sub>edge,k</sub> = t<sub>edge</sub> × L<sub>k</sub> / ΣL</code><br><code>g<sub>k</sub> = min(C, Σ<sub>h</sub> α<sub>h</sub> q<sub>h,k</sub>)</code><br><code>c<sub>edge,k</sub> = t<sub>edge,k</sub> × (1 + g<sub>k</sub>)</code><br><code>c<sub>edge</sub> = Σ<sub>k</sub> c<sub>edge,k</sub></code></p>
     <p><code>α<sub>h</sub></code>はハザード別の感度分析用係数、<code>C</code>は複数ハザードによる増加の上限です。実測遅延率ではありません。ハザード倍率は走行辺だけに掛け、停車辺と乗換辺には掛けません。ハザードによって辺を削除せず、有限の追加コストを与えます。</p>
   </section>
-  <section><h2>4．有向最短経路と放射距離</h2>
+  <section><h2>4．有向最短経路と路線図</h2>
     <p class="manual-formula"><code>D<sub>H,m</sub>(s,v) = min<sub>P(s→v)</sub> Σ<sub>e∈P</sub> cost(e)</code></p>
-    <p>走行辺、継続辺、乗換辺を使って有向最短経路を計算します。放射距離では基準駅から出発する方向の距離を使い、<code>D<sub>H,m</sub>(s,v) ≤ T</code>の駅を到達可能とします。</p>
+    <p>走行辺、継続辺、乗換辺を使って有向最短経路を計算します。路線図では基準駅から出発する方向の距離を使い、<code>D<sub>H,m</sub>(s,v) ≤ T</code>の駅を到達可能とします。</p>
     <p>走行辺の出発ノードまでの最短コストと残りの実効時間から、小区間のコストを進行方向へ順に累積し、上限に達する小区間内で補間して線路上の到達位置を求めます。複数の走行辺から得た範囲の和集合を強調表示します。通常時の範囲とハザード適用後の範囲を別の色で比較します。</p>
   </section>
   <section><h2>5．多次元尺度法</h2>
